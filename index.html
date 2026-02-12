@@ -2,72 +2,121 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LST-OWGR | Standings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LST-OWGR | Official Standings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --blue: #003791; --gold: #b8860b; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 15px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border-left: 8px solid var(--blue); }
-        h1 { color: var(--blue); text-align: center; margin: 0; }
-        .sub { text-align: center; color: var(--gold); font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f9; padding: 20px; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 8px solid var(--blue); }
+        
+        /* Fixed Header Styles */
+        h1 { color: var(--blue); text-align: center; margin: 0; font-size: 2.5em; font-weight: 800; }
+        .sub { text-align: center; color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
+        
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8f9fa; color: #888; padding: 12px; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #eee; }
-        td { padding: 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
-        .rank-badge { background: var(--blue); color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
-        .avg-pill { background: #eee; color: #333; padding: 5px 10px; border-radius: 20px; font-weight: bold; }
-        /* ARROW COLORS */
+        th { background: #f8f9fa; color: #777; padding: 12px; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #eee; }
+        td { padding: 15px; border-bottom: 1px solid #f0f0f0; text-align: center; font-size: 15px; }
+        
+        .rank-badge { background: var(--blue); color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; min-width: 35px; display: inline-block; }
+        
+        /* The Blue Pill Styling */
+        .lst-pill { 
+            background: var(--blue); 
+            color: white; 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            display: inline-block;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
         .up { color: #28a745 !important; font-weight: bold; margin-left: 5px; }
         .down { color: #dc3545 !important; font-weight: bold; margin-left: 5px; }
         .steady { color: #ccc; margin-left: 5px; }
+        
         .fa-steam { color: #171a21; } .fa-playstation { color: #003791; } .fa-xbox { color: #107c10; }
+        #status { text-align: center; padding: 40px; font-weight: bold; color: var(--blue); }
     </style>
 </head>
 <body>
+
 <div class="container">
     <h1>LST-OWGR</h1>
     <div class="sub">Official Tour Standings</div>
-    <div id="loader" style="text-align:center; padding:20px;">Loading Rankings...</div>
+    
+    <div id="status">📡 Loading Rankings...</div>
+    
     <table id="mainTable" style="display:none">
-        <thead><tr><th>Rank</th><th style="text-align:left">Player</th><th>Evts</th><th>Pts</th><th>Avg</th></tr></thead>
+        <thead>
+            <tr>
+                <th width="80">Rank</th>
+                <th style="text-align:left">Player</th>
+                <th>Events</th>
+                <th>Total Pts</th>
+                <th>LST-OWGR</th>
+            </tr>
+        </thead>
         <tbody id="list"></tbody>
     </table>
 </div>
+
 <script>
-   fetch('owgr_data.json?v=' + Date.now())
-    .then(r => r.json())
+    fetch('owgr_data.json?v=' + Date.now())
+    .then(response => response.json())
     .then(data => {
-        document.getElementById('loader').style.display = 'none';
+        document.getElementById('status').style.display = 'none';
         document.getElementById('mainTable').style.display = 'table';
-        const tbody = document.getElementById('list');
-        
+        const listEl = document.getElementById('list');
+
+        // 1. Process and Sort Players
         const players = Object.keys(data).map(name => {
             const p = data[name];
-            const h = p.history || [];
-            const total = h.reduce((a, b) => a + b, 0);
-            const avg = h.length > 0 ? (total / Math.max(20, h.length)) : 0;
-            return { name, total, avg, count: h.length, platform: p.platform, cRank: p.cRank || 99, sRank: p.sRank };
+            const history = p.history || [];
+            const total = history.reduce((a, b) => a + b, 0);
+            const avg = history.length > 0 ? (total / Math.max(20, history.length)) : 0;
+            return {
+                name, total, avg,
+                count: history.length,
+                platform: p.platform || 'steam',
+                cRank: p.cRank || 99,
+                sRank: p.sRank
+            };
         }).sort((a, b) => a.cRank - b.cRank);
 
-        // Count ranks for Ties
+        // 2. Tie Detection Logic
         const rankCounts = {};
-        players.forEach(p => { rankCounts[p.cRank] = (rankCounts[p.cRank] || 0) + 1; });
+        players.forEach(p => {
+            rankCounts[p.cRank] = (rankCounts[p.cRank] || 0) + 1;
+        });
 
+        // 3. Render Table
         players.forEach(p => {
             let arrow = '<span class="steady">●</span>';
             if (p.sRank && p.cRank < p.sRank) arrow = '<span class="up">▲</span>';
             else if (p.sRank && p.cRank > p.sRank) arrow = '<span class="down">▼</span>';
             
+            // Add 'T' if more than 1 person has this rank
             const tiePrefix = rankCounts[p.cRank] > 1 ? "T" : "";
             
-            tbody.innerHTML += `<tr>
-                <td><span class="rank-badge">${tiePrefix}${p.cRank}</span></td>
-                <td style="text-align:left"><i class="fa-brands fa-${p.platform}"></i> <strong>${p.name}</strong> ${arrow}</td>
-                <td>${p.count}</td>
-                <td>${p.total.toFixed(1)}</td>
-                <td><span class="lst-pill">${p.avg.toFixed(3)}</span></td>
-            </tr>`;
+            listEl.innerHTML += `
+                <tr>
+                    <td><span class="rank-badge">${tiePrefix}${p.cRank}</span></td>
+                    <td style="text-align:left">
+                        <i class="fa-brands fa-${p.platform}"></i> 
+                        <strong>${p.name}</strong> ${arrow}
+                    </td>
+                    <td>${p.count}</td>
+                    <td>${p.total.toFixed(1)}</td>
+                    <td><span class="lst-pill">${p.avg.toFixed(3)}</span></td>
+                </tr>`;
         });
+    })
+    .catch(err => {
+        document.getElementById('status').innerHTML = "⚠️ Standings currently offline.";
     });
 </script>
+
 </body>
 </html>
