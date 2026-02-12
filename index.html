@@ -9,36 +9,40 @@
         :root { --blue: #003791; --gold: #b8860b; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f9; padding: 10px; margin: 0; }
         
-        /* RESPONSIVE CONTAINER */
         .container { 
             max-width: 850px; 
-            width: 95%; /* Uses 95% of screen on mobile */
-            margin: 20px auto; 
+            width: 98%; /* Increased slightly for more room */
+            margin: 15px auto; 
             background: white; 
-            padding: 15px; /* Reduced padding for mobile */
+            padding: 12px; 
             border-radius: 12px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
             border-top: 8px solid var(--blue); 
             box-sizing: border-box;
         }
 
-        /* Adjust padding for larger screens */
         @media (min-width: 600px) {
-            .container { padding: 30px; width: auto; }
+            .container { padding: 30px; width: 95%; }
             body { padding: 20px; }
         }
         
         h1 { color: var(--blue); text-align: center; margin: 0; font-size: 1.8em; font-weight: 800; }
         .sub { text-align: center; color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; font-size: 0.8em; }
         
-        /* TABLE SCROLLING: Prevents the table from breaking the layout on narrow phones */
         .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; min-width: 450px; } /* Min-width ensures it stays readable */
+        table { width: 100%; border-collapse: collapse; min-width: 500px; } 
         
         th { background: #f8f9fa; color: #777; padding: 10px; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #eee; }
         td { padding: 12px; border-bottom: 1px solid #f0f0f0; text-align: center; font-size: 14px; }
         
-        .rank-badge { background: var(--blue); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; min-width: 30px; display: inline-block; font-size: 12px; }
+        /* FIX: Prevents names from wrapping to line 2 */
+        .name-cell { 
+            text-align: left !important; 
+            white-space: nowrap; 
+            padding-right: 15px;
+        }
+
+        .rank-badge { background: var(--blue); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; min-width: 32px; display: inline-block; font-size: 12px; }
         
         .lst-pill { 
             background: var(--blue); 
@@ -55,7 +59,10 @@
         .down { color: #dc3545 !important; font-weight: bold; margin-left: 3px; }
         .steady { color: #ccc; margin-left: 3px; }
         
-        .fa-steam { color: #171a21; } .fa-playstation { color: #003791; } .fa-xbox { color: #107c10; }
+        .fa-steam { color: #171a21; width: 18px; } 
+        .fa-playstation { color: #003791; width: 18px; } 
+        .fa-xbox { color: #107c10; width: 18px; }
+        
         #status { text-align: center; padding: 30px; font-weight: bold; color: var(--blue); }
     </style>
 </head>
@@ -71,11 +78,11 @@
         <table id="mainTable" style="display:none">
             <thead>
                 <tr>
-                    <th width="60">Rank</th>
+                    <th width="50">Rank</th>
                     <th style="text-align:left">Player</th>
-                    <th>Evts</th>
-                    <th>Pts</th>
-                    <th>LST-OWGR</th>
+                    <th width="50">Evts</th>
+                    <th width="70">Pts</th>
+                    <th width="100">LST-OWGR</th>
                 </tr>
             </thead>
             <tbody id="list"></tbody>
@@ -111,7 +118,7 @@
             listEl.innerHTML += `
                 <tr>
                     <td><span class="rank-badge">${tiePrefix}${p.cRank}</span></td>
-                    <td style="text-align:left">
+                    <td class="name-cell">
                         <i class="fa-brands fa-${p.platform}"></i> 
                         <strong>${p.name}</strong> ${arrow}
                     </td>
