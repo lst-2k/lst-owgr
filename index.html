@@ -2,111 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LST-OWGR | Official Standings</title>
+    <title>LST-OWGR | Standings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --lst-blue: #003791; --lst-gold: #b8860b; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 15px; line-height: 1.6; }
-        .container { max-width: 850px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-left: 8px solid var(--lst-blue); }
-        h1 { color: var(--lst-blue); text-align: center; margin-bottom: 5px; font-size: 2.2em; }
-        .subtitle { text-align: center; color: var(--lst-gold); font-weight: 800; font-size: 12px; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 2px; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #f8f9fa; color: #666; padding: 12px; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #eee; }
-        td { padding: 16px; border-bottom: 1px solid #f0f0f0; text-align: center; font-size: 15px; }
-        
-        /* THE COLOR FIXES FOR ARROWS */
-        .up { color: #28a745 !important; font-weight: 900; margin-left: 8px; }   /* Solid Green Up */
-        .down { color: #dc3545 !important; font-weight: 900; margin-left: 8px; } /* Solid Red Down */
-        .steady { color: #ccc; margin-left: 8px; }                             /* Grey Neutral */
-
-        .rank-box { background: var(--lst-blue); color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; min-width: 30px; display: inline-block; }
-        .avg-pill { background: #eee; color: #333; padding: 5px 12px; border-radius: 15px; font-weight: 700; font-family: 'Courier New', monospace; }
-        
-        .fa-playstation { color: #003791; margin-right: 8px; }
-        .fa-xbox { color: #107c10; margin-right: 8px; }
-        .fa-steam { color: #171a21; margin-right: 8px; }
-
-        #loader { text-align: center; padding: 40px; color: var(--lst-blue); font-weight: bold; }
+        :root { --blue: #003791; --gold: #b8860b; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 15px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border-left: 8px solid var(--blue); }
+        h1 { color: var(--blue); text-align: center; margin: 0; }
+        .sub { text-align: center; color: var(--gold); font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; color: #888; padding: 12px; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #eee; }
+        td { padding: 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .rank-badge { background: var(--blue); color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+        .avg-pill { background: #eee; color: #333; padding: 5px 10px; border-radius: 20px; font-weight: bold; }
+        /* ARROW COLORS */
+        .up { color: #28a745 !important; font-weight: bold; margin-left: 5px; }
+        .down { color: #dc3545 !important; font-weight: bold; margin-left: 5px; }
+        .steady { color: #ccc; margin-left: 5px; }
+        .fa-steam { color: #171a21; } .fa-playstation { color: #003791; } .fa-xbox { color: #107c10; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <h1>LST-OWGR</h1>
-    <div class="subtitle">Official World Golf Rankings</div>
-    
-    <div id="loader">📡 Connecting to LST Database...</div>
-    
+    <div class="sub">Official Tour Standings</div>
+    <div id="loader" style="text-align:center; padding:20px;">Loading Rankings...</div>
     <table id="mainTable" style="display:none">
-        <thead>
-            <tr>
-                <th width="80">Rank</th>
-                <th style="text-align:left">Player</th>
-                <th>Events</th>
-                <th>Points</th>
-                <th>Avg</th>
-            </tr>
-        </thead>
+        <thead><tr><th>Rank</th><th style="text-align:left">Player</th><th>Evts</th><th>Pts</th><th>Avg</th></tr></thead>
         <tbody id="list"></tbody>
     </table>
 </div>
-
 <script>
-    // Ensure this matches the history key used in your admin tool
-    const DATA_FILE = 'owgr_data.json';
-
-    fetch(DATA_FILE + '?v=' + Date.now())
-    .then(r => {
-        if (!r.ok) throw new Error("JSON file not found on server");
-        return r.json();
-    })
+    fetch('owgr_data.json?v=' + Date.now())
+    .then(r => r.json())
     .then(data => {
         document.getElementById('loader').style.display = 'none';
         document.getElementById('mainTable').style.display = 'table';
-        const b = document.getElementById('list');
+        const tbody = document.getElementById('list');
         
-        const players = Object.keys(data).map(name => {
+        Object.keys(data).map(name => {
             const p = data[name];
-            const history = p.history || [];
-            const totalPoints = history.reduce((a, b) => a + b, 0);
-            const average = history.length > 0 ? (totalPoints / Math.max(20, history.length)) : 0;
-            
-            return {
-                name,
-                totalPoints,
-                average,
-                eventCount: history.length,
-                platform: p.platform || 'steam',
-                cRank: p.cRank || 99,
-                sRank: p.sRank
-            };
-        }).sort((a, b) => a.cRank - b.cRank);
-
-        players.forEach(p => {
+            const h = p.history || [];
+            const total = h.reduce((a, b) => a + b, 0);
+            const avg = h.length > 0 ? (total / Math.max(20, h.length)) : 0;
+            return { name, total, avg, count: h.length, platform: p.platform, cRank: p.cRank || 99, sRank: p.sRank };
+        }).sort((a, b) => a.cRank - b.cRank).forEach(p => {
             let arrow = '<span class="steady">●</span>';
             if (p.sRank && p.cRank < p.sRank) arrow = '<span class="up">▲</span>';
             else if (p.sRank && p.cRank > p.sRank) arrow = '<span class="down">▼</span>';
             
-            b.innerHTML += `
-                <tr>
-                    <td><span class="rank-box">${p.cRank}</span></td>
-                    <td style="text-align:left">
-                        <i class="fa-brands fa-${p.platform}"></i> 
-                        <strong>${p.name}</strong> ${arrow}
-                    </td>
-                    <td>${p.eventCount}</td>
-                    <td>${p.totalPoints.toFixed(1)}</td>
-                    <td><span class="avg-pill">${p.average.toFixed(3)}</span></td>
-                </tr>`;
+            tbody.innerHTML += `<tr>
+                <td><span class="rank-badge">${p.cRank}</span></td>
+                <td style="text-align:left"><i class="fa-brands fa-${p.platform}"></i> <strong>${p.name}</strong> ${arrow}</td>
+                <td>${p.count}</td>
+                <td>${p.total.toFixed(1)}</td>
+                <td><span class="avg-pill">${p.avg.toFixed(3)}</span></td>
+            </tr>`;
         });
-    })
-    .catch(err => {
-        document.getElementById('loader').innerHTML = "⚠️ Standings currently offline. Check back shortly!";
-        console.error("Error loading JSON:", err);
     });
 </script>
-
 </body>
 </html>
