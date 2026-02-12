@@ -29,23 +29,52 @@
     </table>
 </div>
 <script>
+    const MIN_DIVISOR = 20;
+
     fetch('owgr_data.json?v=' + Date.now())
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error("File not found");
+        return r.json();
+    })
     .then(data => {
         document.getElementById('loader').style.display = 'none';
         document.getElementById('mainTable').style.display = 'table';
         const b = document.getElementById('list');
+        
+        // This part now matches your Admin file's data structure
         Object.keys(data).map(n => {
-            const h = data[n].history || []; 
-            const t = h.reduce((a,b)=>a+b,0);
-            return { n, t, avg: h.length > 0 ? (t / Math.max(20, h.length)) : 0, count: h.length, platform: data[n].platform, cRank: data[n].cRank || 99, sRank: data[n].sRank };
+            const player = data[n];
+            const h = player.history || []; // CHANGED FROM pointsHistory TO history
+            const t = h.reduce((a,b) => a + b, 0);
+            
+            return { 
+                n, 
+                t, 
+                avg: h.length > 0 ? (t / Math.max(MIN_DIVISOR, h.length)) : 0, 
+                count: h.length, 
+                platform: player.platform || 'steam', 
+                cRank: player.cRank || 99, 
+                sRank: player.sRank 
+            };
         }).sort((a,b) => a.cRank - b.cRank).forEach(p => {
             let m = '<span style="color:#ccc">●</span>';
             if(p.sRank && p.cRank < p.sRank) m = '<span class="up">▲</span>';
             else if(p.sRank && p.cRank > p.sRank) m = '<span class="down">▼</span>';
-            b.innerHTML += `<tr><td><span class="rank-box">${p.cRank}</span></td><td style="text-align:left"><strong>${p.n}</strong> ${m}</td><td>${p.count}</td><td>${p.t.toFixed(1)}</td><td><span class="avg-pill">${p.avg.toFixed(3)}</span></td></tr>`;
+            
+            b.innerHTML += `<tr>
+                <td><span class="rank-box">${p.cRank}</span></td>
+                <td style="text-align:left"><i class="fa-brands fa-${p.platform}"></i> <strong>${p.n}</strong> ${m}</td>
+                <td>${p.count}</td>
+                <td>${p.t.toFixed(1)}</td>
+                <td><span class="avg-pill">${p.avg.toFixed(3)}</span></td>
+            </tr>`;
         });
+    })
+    .catch(err => {
+        document.getElementById('loader').innerHTML = "⚠️ Data Sync Error. Please refresh.";
+        console.error(err);
     });
 </script>
 </body>
+
 </html>
