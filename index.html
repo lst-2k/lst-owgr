@@ -2,79 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LST-OWGR | Official World Golf Rankings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LST-2k25-OWGR | Official Standings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --lst-blue: #003791; --lst-gold: #b8860b; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f9; padding: 15px; }
-        .container { max-width: 850px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-left: 8px solid var(--lst-blue); }
-        h1 { color: var(--lst-blue); text-align: center; margin-bottom: 5px; letter-spacing: -1px; }
-        .subtitle { text-align: center; color: var(--lst-gold); font-weight: 800; font-size: 12px; text-transform: uppercase; margin-bottom: 25px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8f9fa; color: #666; padding: 12px; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #eee; }
-        td { padding: 16px; border-bottom: 1px solid #f0f0f0; text-align: center; font-size: 15px; }
-        .rank-box { background: var(--lst-blue); color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; }
-        .avg-pill { background: #eee; color: #333; padding: 5px 12px; border-radius: 15px; font-weight: 700; font-family: monospace; }
-        .up { color: #28a745; font-size: 0.9em; } .down { color: #dc3545; font-size: 0.9em; }
+        :root { --gold: #b8860b; --dark-blue: #002147; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 10px; color: #333; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: var(--dark-blue); text-align: center; margin-bottom: 0; font-size: 1.8em; }
+        .subtitle { text-align: center; color: var(--gold); font-weight: bold; margin-bottom: 20px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1.5px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th { background: var(--dark-blue); color: white; font-size: 11px; text-transform: uppercase; padding: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; text-align: center; }
+        .text-left { text-align: left; }
+        .rank-badge { background: var(--gold); color: white; padding: 4px 8px; border-radius: 4px; font-weight: 900; min-width: 20px; display: inline-block; }
+        .avg-pill { background: var(--dark-blue); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        .up { color: #388e3c; font-weight: 900; margin-left: 5px; }
+        .down { color: #d32f2f; font-weight: 900; margin-left: 5px; }
+        .steady { color: #ddd; margin-left: 5px; }
+        .fa-playstation { color: #003791; width: 18px; }
+        .fa-xbox { color: #107c10; width: 18px; }
+        .fa-steam { color: #171a21; width: 18px; }
+        .timestamp { text-align: center; font-size: 11px; color: #777; margin-top: 20px; }
+        #loading { text-align: center; padding: 20px; font-weight: bold; color: var(--gold); }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <h1>LST-OWGR</h1>
-    <div class="subtitle">Official Tour Rankings</div>
-    <div id="loader" style="text-align:center; padding:40px;">📡 Connecting to LST Database...</div>
-    <table id="mainTable" style="display:none">
-        <thead><tr><th>Rank</th><th style="text-align:left">Player</th><th>Events</th><th>Points</th><th>LST-Avg</th></tr></thead>
-        <tbody id="list"></tbody>
+    <h1>🏆 LST-2K25-OWGR</h1>
+    <div class="subtitle">Official World Golf Rankings</div>
+
+    <div id="loading">Syncing with Tour Satellite...</div>
+
+    <table id="rankTable" style="display:none;">
+        <thead>
+            <tr>
+                <th width="50">Rank</th>
+                <th class="text-left">Player</th>
+                <th>Events</th>
+                <th>Total Pts</th>
+                <th>2kOWGR Avg</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboardBody"></tbody>
     </table>
+
+    <div class="timestamp" id="lastUpdated"></div>
 </div>
+
 <script>
     const MIN_DIVISOR = 20;
 
+    // Fetching the JSON with a cache-buster
     fetch('owgr_data.json?v=' + Date.now())
-    .then(r => {
-        if (!r.ok) throw new Error("File not found");
-        return r.json();
-    })
-    .then(data => {
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('mainTable').style.display = 'table';
-        const b = document.getElementById('list');
-        
-        // This part now matches your Admin file's data structure
-        Object.keys(data).map(n => {
-            const player = data[n];
-            const h = player.history || []; // CHANGED FROM pointsHistory TO history
-            const t = h.reduce((a,b) => a + b, 0);
+        .then(response => {
+            if (!response.ok) throw new Error("JSON file not found");
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('rankTable').style.display = 'table';
+            render(data);
+        })
+        .catch(err => {
+            document.getElementById('loading').innerText = "Standings file (owgr_data.json) not detected.";
+            console.error(err);
+        });
+
+    function render(worldPlayers) {
+        const tbody = document.getElementById('leaderboardBody');
+        tbody.innerHTML = '';
+
+        // Process the data to ensure every player has math calculated
+        let list = Object.keys(worldPlayers).map(name => {
+            const p = worldPlayers[name];
+            const history = p.pointsHistory || [];
+            const total = history.reduce((a, b) => a + b, 0);
+            const average = history.length > 0 ? (total / Math.max(MIN_DIVISOR, history.length)) : 0;
             
-            return { 
-                n, 
-                t, 
-                avg: h.length > 0 ? (t / Math.max(MIN_DIVISOR, h.length)) : 0, 
-                count: h.length, 
-                platform: player.platform || 'steam', 
-                cRank: player.cRank || 99, 
-                sRank: player.sRank 
+            return {
+                name: name,
+                total: total,
+                avg: average,
+                count: history.length,
+                platform: p.platform || 'steam',
+                currentRank: p.currentRank || 999,
+                storedRank: p.storedRank || null
             };
-        }).sort((a,b) => a.cRank - b.cRank).forEach(p => {
-            let m = '<span style="color:#ccc">●</span>';
-            if(p.sRank && p.cRank < p.sRank) m = '<span class="up">▲</span>';
-            else if(p.sRank && p.cRank > p.sRank) m = '<span class="down">▼</span>';
+        });
+
+        // Sort by Average (High to Low) if Rank isn't finalized yet
+        list.sort((a, b) => b.avg - a.avg);
+
+        list.forEach((p, index) => {
+            const displayRank = p.currentRank === 999 ? (index + 1) : p.currentRank;
             
-            b.innerHTML += `<tr>
-                <td><span class="rank-box">${p.cRank}</span></td>
-                <td style="text-align:left"><i class="fa-brands fa-${p.platform}"></i> <strong>${p.n}</strong> ${m}</td>
+            let move = '<span class="steady">●</span>';
+            if (p.storedRank) {
+                if (displayRank < p.storedRank) move = '<span class="up">▲</span>';
+                else if (displayRank > p.storedRank) move = '<span class="down">▼</span>';
+            }
+
+            const icon = `fa-brands fa-${p.platform}`;
+            
+            tbody.innerHTML += `<tr>
+                <td><span class="rank-badge">${displayRank}</span></td>
+                <td class="text-left"><i class="${icon}"></i> <strong>${p.name}</strong> ${move}</td>
                 <td>${p.count}</td>
-                <td>${p.t.toFixed(1)}</td>
+                <td>${p.total.toFixed(1)}</td>
                 <td><span class="avg-pill">${p.avg.toFixed(3)}</span></td>
             </tr>`;
         });
-    })
-    .catch(err => {
-        document.getElementById('loader').innerHTML = "⚠️ Data Sync Error. Please refresh.";
-        console.error(err);
-    });
+
+        // Show the last update time if available in the JSON logic or local
+        const now = new Date();
+        document.getElementById('lastUpdated').innerText = "Last Sync: " + now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
 </script>
 </body>
-
 </html>
