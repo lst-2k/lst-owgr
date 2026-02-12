@@ -5,27 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LST-2k25-OWGR | Official Standings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --gold: #b8860b; --dark-blue: #002147; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 10px; color: #333; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: var(--dark-blue); text-align: center; margin-bottom: 0; font-size: 1.8em; }
-        .subtitle { text-align: center; color: var(--gold); font-weight: bold; margin-bottom: 20px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1.5px; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th { background: var(--dark-blue); color: white; font-size: 11px; text-transform: uppercase; padding: 12px; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; text-align: center; }
-        .text-left { text-align: left; }
-        .rank-badge { background: var(--gold); color: white; padding: 4px 8px; border-radius: 4px; font-weight: 900; min-width: 20px; display: inline-block; }
-        .avg-pill { background: var(--dark-blue); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
-        .up { color: #388e3c; font-weight: 900; margin-left: 5px; }
-        .down { color: #d32f2f; font-weight: 900; margin-left: 5px; }
-        .steady { color: #ddd; margin-left: 5px; }
-        .fa-playstation { color: #003791; width: 18px; }
-        .fa-xbox { color: #107c10; width: 18px; }
-        .fa-steam { color: #171a21; width: 18px; }
-        .timestamp { text-align: center; font-size: 11px; color: #777; margin-top: 20px; }
-        #loading { text-align: center; padding: 20px; font-weight: bold; color: var(--gold); }
-    </style>
+<style>
+    :root { --gold: #b8860b; --dark-blue: #002147; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 10px; color: #333; margin: 0; }
+    
+    /* Forces the container to be full width but readable */
+    .container { 
+        max-width: 900px; 
+        margin: auto; 
+        background: white; 
+        padding: 15px; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        width: 95%; /* Ensures it doesn't touch the very edge of mobile screens */
+    }
+
+    /* Fixes the Heading alignment */
+    h1 { color: var(--dark-blue); text-align: center; margin-bottom: 5px; font-size: 1.8em; width: 100%; }
+    .subtitle { text-align: center; color: var(--gold); font-weight: bold; margin-bottom: 20px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1.5px; width: 100%; }
+
+    /* Table Fixes */
+    table { width: 100%; border-collapse: collapse; background: white; table-layout: auto; }
+    
+    th { background: var(--dark-blue); color: white; font-size: 11px; text-transform: uppercase; padding: 12px 5px; }
+    
+    /* This prevents names from wrapping */
+    td { padding: 12px 5px; border-bottom: 1px solid #eee; font-size: 14px; text-align: center; white-space: nowrap; }
+    
+    /* Specifically target the Player column to allow it to be the widest */
+    .text-left { text-align: left; width: 40%; padding-left: 10px; }
+    
+    .rank-badge { background: var(--gold); color: white; padding: 4px 8px; border-radius: 4px; font-weight: 900; min-width: 22px; display: inline-block; }
+    .avg-pill { background: var(--dark-blue); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; display: inline-block; }
+
+    /* Icon spacing */
+    .fa-brands { margin-right: 5px; font-size: 1.1em; vertical-align: middle; }
+
+    .timestamp { text-align: center; font-size: 11px; color: #777; margin-top: 20px; width: 100%; }
+    
+    /* Mobile-specific tweak */
+    @media (max-width: 600px) {
+        td, th { font-size: 12px; padding: 8px 3px; }
+        .container { padding: 10px; width: 98%; }
+    }
+</style>
 </head>
 <body>
 
@@ -122,3 +145,4 @@
 </script>
 </body>
 </html>
+
