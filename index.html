@@ -58,19 +58,35 @@
         document.getElementById('mainTable').style.display = 'table';
         const listEl = document.getElementById('list');
 
-        // Display the date stamp if it exists
         if (data["_lastUpdated"]) {
             document.getElementById('updatedTime').innerText = "Last Updated: " + data["_lastUpdated"];
         }
 
-        // Filter out the meta-date key and map players
         const playerNames = Object.keys(data).filter(k => !k.startsWith('_'));
         const players = playerNames.map(name => {
             const p = data[name];
             const h = p.history || [];
-            const total = h.reduce((a, b) => a + b, 0);
-            const avg = h.length > 0 ? (total / Math.max(20, h.length)) : 0;
-            return { name, total, avg, count: h.length, platform: p.platform || 'steam', cRank: p.cRank || 99, sRank: p.sRank };
+            
+            // 1. Get only the last 50 events
+            const last50 = h.slice(-50); 
+            
+            // 2. Sum only those last 50 events
+            const totalLast50 = last50.reduce((a, b) => a + b, 0);
+            
+            // 3. Divide by the number of events played (max 50), but at least 20
+            // This ensures if they played 60, it divides by 50. If they played 10, it divides by 20.
+            const divisor = Math.max(20, last50.length);
+            const avg = last50.length > 0 ? (totalLast50 / divisor) : 0;
+
+            return { 
+                name, 
+                total: totalLast50, 
+                avg, 
+                count: h.length, 
+                platform: p.platform || 'steam', 
+                cRank: p.cRank || 99, 
+                sRank: p.sRank 
+            };
         }).sort((a, b) => a.cRank - b.cRank);
 
         const rankCounts = {};
