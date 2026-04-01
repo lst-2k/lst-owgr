@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LST-OWGR | Official Standings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+   <style>
         :root { --blue: #003791; --gold: #b8860b; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f9; padding: 10px; margin: 0; }
         .container { max-width: 850px; width: 98%; margin: 15px auto; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 8px solid var(--blue); box-sizing: border-box; }
@@ -14,20 +14,26 @@
         h1 { color: var(--blue); text-align: center; margin: 0; font-size: 1.8em; font-weight: 800; }
         .sub { text-align: center; color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; font-size: 0.8em; }
         
-        /* DATE STAMP STYLE */
         .updated-on { text-align: center; color: #888; font-size: 11px; margin-bottom: 20px; font-style: italic; }
 
         .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; min-width: 500px; } 
         th { background: #f8f9fa; color: #777; padding: 10px; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #eee; }
         td { padding: 12px; border-bottom: 1px solid #f0f0f0; text-align: center; font-size: 14px; }
-        .name-cell { text-align: left !important; white-space: nowrap; padding-right: 15px; }
+        
+        /* UPDATED ICON COLORS */
+        .fa-steam { color: #171a21; }
+        .fa-playstation { color: #003791; }
+        .fa-xbox { color: #107c10; }
+        
+        .name-cell { text-align: left !important; white-space: nowrap; padding-right: 15px; display: flex; align-items: center; gap: 8px; justify-content: flex-start; border-bottom: none; }
+        .name-cell i { width: 18px; text-align: center; }
+
         .rank-badge { background: var(--blue); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; min-width: 32px; display: inline-block; font-size: 12px; }
         .lst-pill { background: var(--blue); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; display: inline-block; font-family: monospace; font-size: 13px; }
         .up { color: #28a745 !important; font-weight: bold; margin-left: 3px; }
         .down { color: #dc3545 !important; font-weight: bold; margin-left: 3px; }
         .steady { color: #ccc; margin-left: 3px; }
-        .fa-steam, .fa-playstation, .fa-xbox { width: 18px; }
         #status { text-align: center; padding: 30px; font-weight: bold; color: var(--blue); }
     </style>
 </head>
