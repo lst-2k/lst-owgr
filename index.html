@@ -97,11 +97,10 @@
             scoreCounts[scoreKey] = (scoreCounts[scoreKey] || 0) + 1; 
         });
 
-        players.forEach((p, index) => {
+	players.forEach((p, index) => {
             const currentRank = index + 1;
             const scoreKey = p.avg.toFixed(3);
             
-            // Determine arrow based on calculated rank vs sRank from JSON
             let arrow = '<span class="steady">●</span>';
             if (p.sRank && currentRank < p.sRank) arrow = '<span class="up">▲</span>';
             else if (p.sRank && currentRank > p.sRank) arrow = '<span class="down">▼</span>';
@@ -111,7 +110,7 @@
             listEl.innerHTML += `<tr>
                 <td><span class="rank-badge">${tiePrefix}${currentRank}</span></td>
                 <td class="name-cell"><i class="fa-brands fa-${p.platform}"></i> <strong>${p.name}</strong> ${arrow}</td>
-                <td>${p.count}</td>
+                <td>${p.count >= 50 ? '=50' : p.count}</td>
                 <td>${p.total.toFixed(1)}</td>
                 <td><span class="lst-pill">${scoreKey}</span></td>
             </tr>`;
